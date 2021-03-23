@@ -1,15 +1,21 @@
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import Navigation from "./component/Navigation";
 import Home from "./pages/Home";
 import History from "./pages/History";
-import "./App.css";
 
 function App() {
   return (
-    <div className="App">
+    <Router>
       <Navigation />
-      <Home />
-      <History />
-    </div>
+      <Switch>
+        <Route path="/" exact>
+          <Home />
+        </Route>
+        <Route path="/history">
+          <History />
+        </Route>
+      </Switch>
+    </Router>
   );
 }
 
