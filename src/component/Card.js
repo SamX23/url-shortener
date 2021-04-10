@@ -1,9 +1,7 @@
-import React from "react";
-
-function Card({ children }) {
+function Card({ children, className }) {
   return (
     <div className="card">
-      <div className="card-body">{children}</div>
+      <div className={`card-body ${className}`}>{children}</div>
     </div>
   );
 }

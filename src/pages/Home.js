@@ -1,4 +1,3 @@
-import React from "react";
 import Container from "../component/Container";
 import Row from "../component/Row";
 import Col from "../component/Col";
@@ -21,7 +20,7 @@ function Home() {
               <small>QRcode and URL Shortener Generator</small>
             </div>
             <form className="mt-2">
-              <div className="form-group">
+              <div className="mb-3">
                 <input
                   type="text"
                   className="form-control search__input"
@@ -29,10 +28,29 @@ function Home() {
                   autoComplete="off"
                 />
               </div>
-              <div className="form-group">
-                <button className="btn btn-primary btn-block">Generate</button>
-              </div>
+              <button className="btn btn-primary btn-block">Generate</button>
             </form>
+          </Card>
+        </Col>
+      </Row>
+      <Row className="mt-5 ">
+        <Col className="col-md-6 offset-md-3">
+          <Card className="card">
+            <div className="text-center">
+              <small>Result</small>
+              <br />
+            </div>
+            <ul className="list-group mt-3">
+              <li className="list-group-item">
+                Short Url : <a href="">xxx</a>
+              </li>
+              <li className="list-group-item">
+                Alternative Url : <a href="">xxx</a>
+              </li>
+              <li className="list-group-item">
+                Original Url : <a href="">xxx</a>
+              </li>
+            </ul>
           </Card>
         </Col>
       </Row>
