@@ -1,3 +1,7 @@
+.form-group {
+  padding: 0.5rem 0.2rem;
+}
+
 .search__input {
   border: 1px solid lightgray;
   height: 50px;
@@ -16,8 +20,11 @@
 
 .search__input:focus {
   border-color: lightgray;
-  -webkit-box-shadow: none;
   box-shadow: none;
+}
+
+.card {
+  border-radius: 25px;
 }
 
 .btn {
