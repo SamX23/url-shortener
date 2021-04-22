@@ -1,5 +1,5 @@
-function Col({ children, className }) {
-  return <div className={`col ${className}`}>{children}</div>;
-}
+const Col = ({ children, className }) => (
+  <div className={`col ${className}`}>{children}</div>
+);
 
 export default Col;
