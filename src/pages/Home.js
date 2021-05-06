@@ -6,30 +6,72 @@ import Card from "../component/Card";
 import Loading from "../component/Loading";
 import Error from "../component/Error";
 import "../style/Home.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Result from "../component/Result";
 
-function Home() {
+const Home = () => {
+  const [history, setHistory] = useState([]);
   const [link, setLink] = useState("");
   const [isLoading, setLoading] = useState(false);
   const [result, setResult] = useState();
   const [isError, setError] = useState();
 
+  useEffect(() => {
+    const localHistory = localStorage.getItem("history");
+    if (localHistory) {
+      setHistory(JSON.parse(localHistory));
+    }
+  }, [setHistory]);
+
+  const isValidURL = () => {
+    var pattern = new RegExp(
+      "^(https?:\\/\\/)?" +
+        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" +
+        "((\\d{1,3}\\.){3}\\d{1,3}))" +
+        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" +
+        "(\\?[;&a-z\\d%_.~+=-]*)?" +
+        "(\\#[-a-z\\d_]*)?$",
+      "i"
+    );
+    return !!pattern.test(link);
+  };
+
   const submit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setResult();
+    setError();
 
-    const response = await axios
-      .get(`https://api.shrtco.de/v2/shorten?url=${link}`)
-      .catch((err) => setError(err));
+    try {
+      if (!isValidURL()) {
+        const err = {
+          data: { error: "Please input a valid URL!" },
+        };
+        setError(err);
+        setLoading(false);
+        return;
+      }
 
-    setResult(response.data.result);
+      const response = await axios.get(
+        `https://api.shrtco.de/v2/shorten?url=${link}`
+      );
+
+      setResult(response.data.result);
+      const historyLog = [...history, response.data.result];
+      setHistory(historyLog);
+      localStorage.setItem("history", JSON.stringify(historyLog));
+    } catch (error) {
+      setError(error);
+    }
+
+    setLoading(false);
   };
 
   return (
-    <>
-      <Container className="mt-5">
-        <Row>
-          <Col className="col-md-6 offset-md-3">
+    <Container className="mt-5">
+      <Row>
+        <Col>
+          <div className="qrcode-card">
             <Card className="card">
               <div className="text-center">
                 <img
@@ -56,41 +98,15 @@ function Home() {
                 </button>
               </form>
             </Card>
-          </Col>
-        </Row>
+          </div>
+        </Col>
+      </Row>
 
-        {result && (
-          <Row className="mt-5 ">
-            <Col className="col-md-6 offset-md-3">
-              <Card className="card">
-                <div className="text-center">
-                  <small>Result</small>
-                  <br />
-                </div>
-                <ul className="list-group mt-3">
-                  <li className="list-group-item">
-                    Short Url :{" "}
-                    <a href={result.short_link}>{result.short_link}</a>
-                  </li>
-                  <li className="list-group-item">
-                    Alternative Url :{" "}
-                    <a href={result.short_link2}>{result.short_link2}</a>
-                  </li>
-                  <li className="list-group-item">
-                    Original Url :{" "}
-                    <a href={result.original_link}>{result.original_link}</a>
-                  </li>
-                </ul>
-              </Card>
-            </Col>
-          </Row>
-        )}
-      </Container>
-
+      {result && <Result result={result} />}
       {isLoading && !result && <Loading />}
-      {isError && <Error />}
-    </>
+      {isError && <Error error={isError} />}
+    </Container>
   );
-}
+};
 
 export default Home;
