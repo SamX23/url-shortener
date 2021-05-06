@@ -30,3 +30,8 @@
 .btn {
   border-radius: 25px;
 }
+
+.qrcode-card {
+  width: 75%;
+  margin: auto;
+}
