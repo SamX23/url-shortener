@@ -27,38 +27,27 @@ const Home = () => {
     }
   }, [dispatch]);
 
-  const fetching = async () => {
-    try {
-      dispatch({
-        type: "SET_LOADING",
-        isLoading: true,
-      });
+  const reset = () => {
+    dispatch({
+      type: "SET_LOADING",
+      isLoading: true,
+    });
 
-      dispatch({
-        type: "SET_RESULT",
-        result: null,
-      });
+    dispatch({
+      type: "SET_RESULT",
+      result: null,
+    });
 
-      dispatch({
-        type: "SET_ERROR",
-        error: null,
-      });
-
-      const response = await axios.get(
-        `https://api.shrtco.de/v2/shorten?url=${link}`
-      );
-      return response.data.result;
-    } catch (error) {
-      dispatch({
-        type: "SET_ERROR",
-        error: error.response,
-      });
-      return new Error(error.response);
-    }
+    dispatch({
+      type: "SET_ERROR",
+      error: null,
+    });
   };
 
   const submit = async (e) => {
     e.preventDefault();
+
+    reset();
 
     if (!UrlValidation(link)) {
       const err = {
@@ -76,22 +65,30 @@ const Home = () => {
         type: "SET_LOADING",
         isLoading: false,
       });
-      return;
     }
 
-    try {
-      const data = await fetching();
-      const historyLog = [...history, data];
-      dispatch({
-        type: "SET_RESULT",
-        result: data,
-      });
-      dispatch({
-        type: "SET_HISTORY",
-        result: historyLog,
-      });
-      localStorage.setItem("history", JSON.stringify(historyLog));
-    } catch (e) {}
+    await axios
+      .get(`https://api.shrtco.de/v2/shorten?url=${link}`)
+      .then((response) => {
+        dispatch({
+          type: "SET_RESULT",
+          result: response.data.result,
+        });
+        dispatch({
+          type: "SET_HISTORY",
+          history: [...history, response.data.result],
+        });
+        localStorage.setItem(
+          "history",
+          JSON.stringify([...history, response.data.result])
+        );
+      })
+      .catch((error) =>
+        dispatch({
+          type: "SET_ERROR",
+          error: error.response,
+        })
+      );
 
     dispatch({
       type: "SET_LOADING",
@@ -100,7 +97,7 @@ const Home = () => {
   };
 
   return (
-    <Container className="mt-5">
+    <Container className="my-5">
       <Row>
         <Col>
           <div className="qrcode-card">
