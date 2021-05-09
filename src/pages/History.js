@@ -19,13 +19,13 @@ const History = () => {
   }, [dispatch]);
 
   return (
-    <Container className="mt-5">
-      <Row className="mb-5">
-        <Col className="col-md-10 offset-md-1 d-grid">
+    <Container className="my-5">
+      <Row>
+        <Col className="col d-grid">
           <h4 className=" text-center m-auto p-5">History</h4>
-          <Card className="card">
+          <Card className="card ">
             {history && history.length > 0 ? (
-              <table className="table m-auto w-100">
+              <table className="table">
                 <thead>
                   <tr>
                     <th>Original URL</th>
@@ -53,9 +53,9 @@ const History = () => {
                         </td>
                         <td>
                           <img
+                            className="qrcode"
                             src={`https://qrtag.net/api/qr_transparent_6.png?url=${result.original_link}`}
                             alt="qrcode"
-                            width="70"
                           />
                         </td>
                       </tr>

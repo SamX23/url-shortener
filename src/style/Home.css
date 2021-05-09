@@ -35,3 +35,8 @@
   width: 75%;
   margin: auto;
 }
+
+.qrcode {
+  max-width: 5rem;
+  width: 100%;
+}
