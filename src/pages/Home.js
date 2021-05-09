@@ -5,66 +5,98 @@ import Col from "../component/Col";
 import Card from "../component/Card";
 import Loading from "../component/Loading";
 import Error from "../component/Error";
-import "../style/Home.css";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Result from "../component/Result";
+import { useStateValue } from "../context/StateProvider";
+import UrlValidation from "../functions/urlValidator";
+import "../style/Home.css";
 
 const Home = () => {
-  const [history, setHistory] = useState([]);
-  const [link, setLink] = useState("");
-  const [isLoading, setLoading] = useState(false);
-  const [result, setResult] = useState();
-  const [isError, setError] = useState();
+  const [
+    { error, result, isLoading, link, history },
+    dispatch,
+  ] = useStateValue();
 
   useEffect(() => {
     const localHistory = localStorage.getItem("history");
     if (localHistory) {
-      setHistory(JSON.parse(localHistory));
+      dispatch({
+        type: "SET_HISTORY",
+        history: JSON.parse(localHistory),
+      });
     }
-  }, [setHistory]);
+  }, [dispatch]);
 
-  const isValidURL = () => {
-    var pattern = new RegExp(
-      "^(https?:\\/\\/)?" +
-        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" +
-        "((\\d{1,3}\\.){3}\\d{1,3}))" +
-        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" +
-        "(\\?[;&a-z\\d%_.~+=-]*)?" +
-        "(\\#[-a-z\\d_]*)?$",
-      "i"
-    );
-    return !!pattern.test(link);
-  };
-
-  const submit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setResult();
-    setError();
-
+  const fetching = async () => {
     try {
-      if (!isValidURL()) {
-        const err = {
-          data: { error: "Please input a valid URL!" },
-        };
-        setError(err);
-        setLoading(false);
-        return;
-      }
+      dispatch({
+        type: "SET_LOADING",
+        isLoading: true,
+      });
+
+      dispatch({
+        type: "SET_RESULT",
+        result: null,
+      });
+
+      dispatch({
+        type: "SET_ERROR",
+        error: null,
+      });
 
       const response = await axios.get(
         `https://api.shrtco.de/v2/shorten?url=${link}`
       );
-
-      setResult(response.data.result);
-      const historyLog = [...history, response.data.result];
-      setHistory(historyLog);
-      localStorage.setItem("history", JSON.stringify(historyLog));
+      return response.data.result;
     } catch (error) {
-      setError(error);
+      dispatch({
+        type: "SET_ERROR",
+        error: error.response,
+      });
+      return new Error(error.response);
+    }
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+
+    if (!UrlValidation(link)) {
+      const err = {
+        data: {
+          error: "Please input a valid URL!",
+        },
+      };
+
+      dispatch({
+        type: "SET_ERROR",
+        error: err,
+      });
+
+      dispatch({
+        type: "SET_LOADING",
+        isLoading: false,
+      });
+      return;
     }
 
-    setLoading(false);
+    try {
+      const data = await fetching();
+      const historyLog = [...history, data];
+      dispatch({
+        type: "SET_RESULT",
+        result: data,
+      });
+      dispatch({
+        type: "SET_HISTORY",
+        result: historyLog,
+      });
+      localStorage.setItem("history", JSON.stringify(historyLog));
+    } catch (e) {}
+
+    dispatch({
+      type: "SET_LOADING",
+      isLoading: false,
+    });
   };
 
   return (
@@ -90,7 +122,12 @@ const Home = () => {
                     placeholder="Your URL"
                     autoComplete="off"
                     value={link}
-                    onChange={(e) => setLink(e.target.value)}
+                    onChange={(e) =>
+                      dispatch({
+                        type: "SET_LINK",
+                        link: e.target.value,
+                      })
+                    }
                   />
                 </div>
                 <button type="submit" className="btn btn-primary btn-block">
@@ -104,7 +141,7 @@ const Home = () => {
 
       {result && <Result result={result} />}
       {isLoading && !result && <Loading />}
-      {isError && <Error error={isError} />}
+      {error && <Error error={error} />}
     </Container>
   );
 };
