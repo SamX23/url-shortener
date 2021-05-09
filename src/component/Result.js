@@ -9,7 +9,7 @@ const Result = ({ result }) => {
         <div className="qrcode-card">
           <Card className="card">
             <div className="text-center">
-              <small>Result</small>
+              <h2>Result</h2>
               <br />
               <img
                 src={`https://qrtag.net/api/qr_transparent_6.png?url=${result.original_link}`}
