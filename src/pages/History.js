@@ -2,16 +2,21 @@ import Container from "../component/Container";
 import Row from "../component/Row";
 import Col from "../component/Col";
 import Card from "../component/Card";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useStateValue } from "../context/StateProvider";
 
 const History = () => {
-  const [history, setHistory] = useState([]);
+  const [{ history }, dispatch] = useStateValue();
+
   useEffect(() => {
-    const localhistory = localStorage.getItem("history");
-    if (localhistory) {
-      setHistory(JSON.parse(localhistory));
+    const localHistory = localStorage.getItem("history");
+    if (localHistory) {
+      dispatch({
+        type: "SET_HISTORY",
+        history: JSON.parse(localHistory),
+      });
     }
-  }, [setHistory]);
+  }, [dispatch]);
 
   return (
     <Container className="mt-5">
